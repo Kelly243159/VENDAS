@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Minhas Vendas</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<style>
+:root{--bg:#eef3fb;--card:#fff;--tx:#12203a;--mu:#5f6f8c;--pr:#1f5fd6;--pr2:#e1ebfc;--bd:#d6e0f0;--dg:#c8383d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1524;--card:#152036;--tx:#e6edfa;--mu:#8fa1c2;--pr:#3b82f6;--pr2:#1a2f57;--bd:#24344f;--dg:#ff7a7f}}
+:root[data-theme="dark"]{--bg:#0d1524;--card:#152036;--tx:#e6edfa;--mu:#8fa1c2;--pr:#3b82f6;--pr2:#1a2f57;--bd:#24344f;--dg:#ff7a7f}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.02em}
+.wrap{max-width:900px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;margin-bottom:14px}
+label{display:block;font-size:13px;color:var(--mu);margin:10px 0 4px}
+input,select{width:100%;padding:11px 12px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--pr);outline-offset:1px}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:11px 16px;background:var(--pr);color:#fff;font-weight:600}
+:root[data-theme="dark"] button.p,:root:not([data-theme="light"]) button.p{color:#06231a}
+button.g{background:transparent;color:var(--mu);border:1px solid var(--bd)}
+button.x{background:transparent;color:var(--dg);padding:4px 8px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hd{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0 14px}
+.nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px}
+.nav button{background:var(--card);color:var(--mu);border:1px solid var(--bd);white-space:nowrap}
+.nav button.on{background:var(--pr);color:#fff;border-color:var(--pr)}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.k{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px}
+.k small{color:var(--mu);display:block}
+.k b{font-size:22px;color:var(--pr);display:block;margin:2px 0}
+.k span{font-size:12px;color:var(--mu)}
+.big{background:linear-gradient(135deg,#1f5fd6,#0b3a94);color:#fff;border-radius:16px;padding:20px;margin-bottom:14px}
+.big small{opacity:.85}.big b{display:block;font-size:34px;letter-spacing:-.03em}
+.sc{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--bd);white-space:nowrap}
+th{color:var(--mu);font-weight:600;font-size:13px}
+td.n,th.n{text-align:right}
+.tag{background:var(--pr2);color:var(--pr);border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600}
+.pv{background:var(--pr2);color:var(--pr);border-radius:10px;padding:10px 12px;margin-top:12px;font-weight:600}
+.em{color:var(--mu);text-align:center;padding:18px}
+.hide{display:none!important}#fwb{position:fixed;inset:0;background:rgba(5,15,40,.72);z-index:20;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px}#fwb canvas{position:absolute;inset:0}#pb{position:relative;color:#fff;font-size:clamp(32px,9vw,54px);font-weight:800;letter-spacing:-.02em}#pb small{display:block;font-size:clamp(15px,4vw,19px);font-weight:500;opacity:.92;margin-top:8px}#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;z-index:9}
+#login{max-width:380px;margin:12vh auto 0}
+.err{color:var(--dg);font-size:13px;min-height:18px;margin-top:8px}
+@media(max-width:560px){.kpis{grid-template-columns:1fr}.row{grid-template-columns:1fr}.k b{font-size:20px}}
+</style>
+</head>
+<body>
+<div class="wrap" id="login">
+  <div class="card">
+    <h1>Minhas Vendas</h1>
+    <p style="color:var(--mu);margin:4px 0 8px">Entre para ver suas comissões.</p>
+    <label for="u">Usuário</label><input id="u" autocomplete="username">
+    <label for="p">Senha</label><input id="p" type="password" autocomplete="current-password">
+    <div class="err" id="err"></div>
+    <button style="width:100%;margin-top:6px" onclick="entrar()">Entrar</button>
+  </div>
+</div>
+
+<div class="wrap hide" id="app">
+  <div class="hd"><h1>Olá, Wagner</h1><button class="g" onclick="sair()">Sair</button></div>
+  <div class="nav" id="nav"></div>
+
+  <section id="v-dash"></section>
+
+  <section id="v-venda" class="hide">
+    <div class="card">
+      <h2>Lançar venda</h2>
+      <div class="row">
+        <div><label>Data da venda</label><input type="date" id="vd" oninput="prev()"></div>
+        <div><label>Valor (R$)</label><input type="number" id="vv" step="0.01" min="0" placeholder="0,00" oninput="prev()"></div>
+      </div>
+      <label>Categoria</label><select id="vc" onchange="prev()"></select>
+      <label>Cliente / observação (opcional)</label><input id="vn">
+      <div class="pv" id="pv">Comissão: R$ 0,00</div>
+      <button style="margin-top:12px;width:100%" onclick="addVenda()">Salvar venda</button>
+    </div>
+  </section>
+
+  <section id="v-cat" class="hide">
+    <div class="card">
+      <h2 id="ch">Nova categoria</h2>
+      <div class="row">
+        <div><label>Nome</label><input id="cn" placeholder="Ex.: Renovação de contratos"></div>
+        <div><label>Comissão (%)</label><input type="number" id="cp" step="0.01" min="0" max="100" placeholder="5"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px"><button style="flex:1" id="cbtn" onclick="addCat()">Criar categoria</button><button class="g hide" id="cx" onclick="cancC()">Cancelar</button></div>
+    </div>
+    <div class="card"><h3 style="margin-bottom:8px">Suas categorias</h3><div class="sc" id="catl"></div></div>
+  </section>
+
+  <section id="v-rel" class="hide">
+    <div class="card">
+      <h2>Relatório de comissões</h2>
+      <div class="row">
+        <div><label>De</label><input type="date" id="rf" oninput="rel()"></div>
+        <div><label>Até</label><input type="date" id="rt" oninput="rel()"></div>
+      </div>
+      <label>Agrupar por</label>
+      <select id="rg" onchange="rel()"><option value="d">Dia</option><option value="w">Semana</option><option value="m" selected>Mês</option></select>
+      <button style="margin-top:12px;width:100%" onclick="xls()">Baixar relatório em Excel</button>
+    </div>
+    <div id="relo"></div>
+  </section>
+</div>
+
+<div id="fwb" class="hide" onclick="this.classList.add('hide')"><canvas id="fw"></canvas><div id="pb"></div></div>
+<div id="toast" class="hide"></div>
+<script>
+const $=id=>document.getElementById(id);
+const R=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const pd=s=>{const[a,b,c]=s.split('-');return new Date(+a,b-1,+c)};
+const br=s=>s.split('-').reverse().join('/');
+const add=(s,n)=>{const d=pd(s);d.setDate(d.getDate()+n);return iso(d)};
+const wk=s=>{const d=pd(s);d.setDate(d.getDate()-(d.getDay()+6)%7);return iso(d)};
+let S={cats:[{n:'Venda nova',p:5},{n:'Renovação de contratos',p:3}],sales:[]};
+try{const x=localStorage.getItem('vc_data');if(x)S=JSON.parse(x)}catch(e){}
+const save=()=>{try{localStorage.setItem('vc_data',JSON.stringify(S))}catch(e){}};
+const com=l=>l.reduce((a,s)=>a+s.v*s.p/100,0);
+const tot=l=>l.reduce((a,s)=>a+s.v,0);
+const rng=(a,b)=>S.sales.filter(s=>s.d>=a&&s.d<=b);
+
+function entrar(){
+  if($('u').value.trim()==='Wagner'&&$('p').value==='Wagner1234'){
+    try{sessionStorage.setItem('vc_ok','1')}catch(e){}
+    abrir();
+  }else $('err').textContent='Usuário ou senha incorretos.';
+}
+function sair(){try{sessionStorage.removeItem('vc_ok')}catch(e){}$('app').classList.add('hide');$('login').classList.remove('hide');$('p').value=''}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&!$('login').classList.contains('hide'))entrar()});
+
+const tabs=[['dash','Resumo'],['venda','Lançar venda'],['cat','Categorias'],['rel','Relatório']];
+function ir(t){
+  tabs.forEach(([k])=>$('v-'+k).classList.toggle('hide',k!==t));
+  $('nav').innerHTML=tabs.map(([k,n])=>`<button class="${k===t?'on':''}" onclick="ir('${k}')">${n}</button>`).join('');
+  if(t==='dash')dash();if(t==='venda')vend();if(t==='cat')cats();if(t==='rel')rel();
+}
+function abrir(){
+  $('login').classList.add('hide');$('app').classList.remove('hide');
+  const h=iso(new Date());$('vd').value=h;$('rf').value=h.slice(0,8)+'01';$('rt').value=h.slice(0,8)+'31';
+  ir('dash');
+}
+
+function dash(){
+  const h=iso(new Date()),ws=wk(h),ms=h.slice(0,8);
+  const d=rng(h,h),w=rng(ws,add(ws,6)),m=rng(ms+'01',ms+'31');
+  const k=(t,l)=>`<div class="k"><small>${t}</small><b>${R(com(l))}</b><span>${l.length} venda(s) · ${R(tot(l))}</span></div>`;
+  const last=[...S.sales].sort((a,b)=>b.d.localeCompare(a.d)||b.id-a.id).slice(0,6);
+  $('v-dash').innerHTML=`<div class="big"><small>Comissão do mês</small><b>${R(com(m))}</b><small>${R(tot(m))} vendidos em ${m.length} venda(s)</small></div>
+  <div class="kpis">${k('Hoje',d)}${k('Esta semana',w)}${k('Este mês',m)}</div>
+  <div class="card" style="margin-top:14px"><h3 style="margin-bottom:8px">Últimas vendas</h3>${lista(last,true)}</div>`;
+}
+function lista(l,del){
+  if(!l.length)return '<div class="em">Nenhuma venda ainda. Use “Lançar venda” para começar.</div>';
+  return `<div class="sc"><table><tr><th>Data</th><th>Categoria</th><th>Cliente</th><th class="n">Valor</th><th class="n">Comissão</th>${del?'<th></th>':''}</tr>`+
+  l.map(s=>`<tr><td>${br(s.d)}</td><td><span class="tag">${esc(s.c)} ${s.p}%</span></td><td>${esc(s.n||'-')}</td><td class="n">${R(s.v)}</td><td class="n"><b>${R(s.v*s.p/100)}</b></td>${del?`<td><button class="x" onclick="delV(${s.id},this)">Excluir</button></td>`:''}</tr>`).join('')+'</table></div>';
+}
+
+function vend(){
+  $('vc').innerHTML=S.cats.length?S.cats.map((c,i)=>`<option value="${i}">${esc(c.n)} (${c.p}%)</option>`).join(''):'<option value="">Crie uma categoria primeiro</option>';
+  prev();
+}
+function prev(){
+  const c=S.cats[$('vc').value],v=parseFloat($('vv').value)||0;
+  $('pv').textContent='Comissão: '+R(c?v*c.p/100:0);
+}
+function addVenda(){
+  const c=S.cats[$('vc').value],v=parseFloat($('vv').value),d=$('vd').value;
+  if(!c||!d||!(v>0)){toast('Informe a data, a categoria e um valor maior que zero.');return}
+  S.sales.push({id:Date.now(),d,v,c:c.n,p:c.p,n:$('vn').value.trim()});
+  save();$('vv').value='';$('vn').value='';ir('dash');festa(v*c.p/100);
+}
+function conf(b){if(b.dataset.c==='1')return true;b.dataset.c='1';const t=b.textContent;b.textContent='Confirmar?';b.style.fontWeight='800';setTimeout(()=>{b.dataset.c='';b.textContent=t;b.style.fontWeight=''},3000);return false}
+function delV(id,b){if(!conf(b))return;S.sales=S.sales.filter(s=>s.id!==id);save();$('v-dash').classList.contains('hide')?rel():dash();toast('Venda excluída.')}
+
+function cats(){
+  $('catl').innerHTML=S.cats.length?`<table><tr><th>Categoria</th><th class="n">Comissão</th><th></th></tr>`+S.cats.map((c,i)=>`<tr><td>${esc(c.n)}</td><td class="n">${c.p}%</td><td class="n"><button class="x" style="color:var(--pr)" onclick="editC(${i})">Editar</button><button class="x" onclick="delC(${i},this)">Excluir</button></td></tr>`).join('')+'</table>':'<div class="em">Nenhuma categoria criada.</div>';
+}
+let ec=-1;
+function editC(i){ec=i;$('cn').value=S.cats[i].n;$('cp').value=S.cats[i].p;$('ch').textContent='Editar categoria';$('cbtn').textContent='Salvar alteração';$('cx').classList.remove('hide');$('cn').focus()}
+function cancC(){ec=-1;$('cn').value='';$('cp').value='';$('ch').textContent='Nova categoria';$('cbtn').textContent='Criar categoria';$('cx').classList.add('hide')}
+function addCat(){
+  const n=$('cn').value.trim(),p=parseFloat($('cp').value);
+  if(!n||isNaN(p)||p<0||p>100){toast('Informe o nome e uma porcentagem entre 0 e 100.');return}
+  if(ec>=0)S.cats[ec]={n,p};else S.cats.push({n,p});save();cancC();cats();
+}
+function delC(i,b){if(!conf(b))return;S.cats.splice(i,1);save();cats();toast('Categoria excluída.')}
+
+function rel(){
+  const a=$('rf').value,b=$('rt').value,g=$('rg').value;
+  if(!a||!b){return}
+  const l=rng(a,b).sort((x,y)=>y.d.localeCompare(x.d)||y.id-x.id);
+  const key=s=>g==='d'?s.d:g==='w'?wk(s.d):s.d.slice(0,7);
+  const lab=k=>g==='d'?br(k):g==='w'?'Semana '+br(k).slice(0,5)+' a '+br(add(k,6)).slice(0,5):k.split('-').reverse().join('/');
+  const G={};l.forEach(s=>{(G[key(s)]=G[key(s)]||[]).push(s)});
+  const C={};l.forEach(s=>{(C[s.c]=C[s.c]||[]).push(s)});
+  const ks=Object.keys(G).sort().reverse();
+  $('relo').innerHTML=`<div class="kpis" style="margin-bottom:14px">
+   <div class="k"><small>Comissão no período</small><b>${R(com(l))}</b></div>
+   <div class="k"><small>Total vendido</small><b>${R(tot(l))}</b></div>
+   <div class="k"><small>Vendas</small><b>${l.length}</b></div></div>
+  <div class="card"><h3 style="margin-bottom:8px">Comissão por ${g==='d'?'dia':g==='w'?'semana':'mês'}</h3>
+   ${ks.length?`<div class="sc"><table><tr><th>Período</th><th class="n">Vendas</th><th class="n">Vendido</th><th class="n">Comissão</th></tr>${ks.map(k=>`<tr><td>${lab(k)}</td><td class="n">${G[k].length}</td><td class="n">${R(tot(G[k]))}</td><td class="n"><b>${R(com(G[k]))}</b></td></tr>`).join('')}</table></div>`:'<div class="em">Sem vendas neste período.</div>'}</div>
+  <div class="card"><h3 style="margin-bottom:8px">Por categoria</h3>
+   ${Object.keys(C).length?`<div class="sc"><table><tr><th>Categoria</th><th class="n">Vendas</th><th class="n">Vendido</th><th class="n">Comissão</th></tr>${Object.keys(C).map(k=>`<tr><td>${esc(k)}</td><td class="n">${C[k].length}</td><td class="n">${R(tot(C[k]))}</td><td class="n"><b>${R(com(C[k]))}</b></td></tr>`).join('')}</table></div>`:'<div class="em">Sem dados.</div>'}</div>
+  <div class="card"><h3 style="margin-bottom:8px">Vendas do período</h3>${lista(l,true)}</div>`;
+}
+
+function festa(cm){
+ const cv=$('fw'),x=cv.getContext('2d');cv.width=innerWidth;cv.height=innerHeight;
+ $('pb').innerHTML='🎉 Parabéns!<small>Venda lançada! Você ganhou '+R(cm)+' de comissão</small>';
+ $('fwb').classList.remove('hide');
+ if(matchMedia('(prefers-reduced-motion: reduce)').matches){setTimeout(()=>$('fwb').classList.add('hide'),2500);return}
+ let P=[],t0=0,last=-999;
+ const boom=()=>{const X=cv.width*(.1+Math.random()*.8),Y=cv.height*(.1+Math.random()*.5),h=Math.random()*360;for(let i=0;i<70;i++){const a=Math.PI*2*i/70,v=2+Math.random()*4.5;P.push({x:X,y:Y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:1,h:h+Math.random()*30})}};
+ const f=t=>{
+  if(!t0)t0=t;const e=t-t0;x.clearRect(0,0,cv.width,cv.height);
+  if(e<2800&&e-last>380){boom();last=e}
+  P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.06;p.vx*=.985;p.vy*=.99;p.l-=.013;x.fillStyle='hsla('+p.h+',100%,60%,'+Math.max(p.l,0)+')';x.beginPath();x.arc(p.x,p.y,2.6,0,7);x.fill()});
+  P=P.filter(p=>p.l>0);
+  if(e<4200)requestAnimationFrame(f);else{$('fwb').classList.add('hide');x.clearRect(0,0,cv.width,cv.height)}
+ };
+ requestAnimationFrame(f);
+}
+function toast(m){const t=$('toast');t.textContent=m;t.classList.remove('hide');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.add('hide'),3000)}
+function dl(u,n){const a=document.createElement('a');a.href=u;a.download=n;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000)}
+async function xls(){
+ const a=$('rf').value,b=$('rt').value,g=$('rg').value;
+ if(!window.ExcelJS){toast('A biblioteca do Excel não carregou. Verifique a internet.');return}
+ const l=rng(a,b).sort((x,y)=>x.d.localeCompare(y.d));
+ const key=s=>g==='d'?s.d:g==='w'?wk(s.d):s.d.slice(0,7);
+ const lab=k=>g==='d'?br(k):g==='w'?br(k)+' a '+br(add(k,6)):k.split('-').reverse().join('/');
+ const G={},C={};l.forEach(s=>{(G[key(s)]=G[key(s)]||[]).push(s);(C[s.c]=C[s.c]||[]).push(s)});
+ const wb=new ExcelJS.Workbook(),fl=c=>({type:'pattern',pattern:'solid',fgColor:{argb:c}});
+ const sheet=(nome,cols,rows,money,pct,tot)=>{
+  const ws=wb.addWorksheet(nome);ws.addRow(cols);
+  ws.getRow(1).eachCell(c=>{c.fill=fl('FF1F5FD6');c.font={bold:true,color:{argb:'FFFFFFFF'}};c.alignment={horizontal:'center'}});
+  rows.forEach((r,i)=>{const w=ws.addRow(r);if(i%2)w.eachCell(c=>c.fill=fl('FFEAF1FD'))});
+  if(tot)ws.addRow(tot).eachCell(c=>{c.fill=fl('FFD7F0E0');c.font={bold:true}});
+  ws.eachRow((r,n)=>{if(n>1){money.forEach(i=>r.getCell(i+1).numFmt='R$ #,##0.00');pct.forEach(i=>r.getCell(i+1).numFmt='0.##%')}});
+  cols.forEach((_,i)=>ws.getColumn(i+1).width=24);ws.views=[{state:'frozen',ySplit:1}];
+ };
+ const sum=(k,f)=>k.reduce((x,y)=>x+f(y),0);
+ sheet('Resumo',['Período','Vendas','Total vendido','Comissão'],Object.keys(G).sort().map(k=>[lab(k),G[k].length,tot(G[k]),com(G[k])]),[2,3],[],['TOTAL',l.length,tot(l),com(l)]);
+ sheet('Por categoria',['Categoria','Vendas','Total vendido','Comissão'],Object.keys(C).map(k=>[k,C[k].length,tot(C[k]),com(C[k])]),[2,3],[],['TOTAL',l.length,tot(l),com(l)]);
+ sheet('Vendas',['Data','Categoria','% Comissão','Cliente','Valor','Comissão'],l.map(s=>[br(s.d),s.c,s.p/100,s.n||'',s.v,s.v*s.p/100]),[4,5],[2],['TOTAL','','','',tot(l),com(l)]);
+ const buf=await wb.xlsx.writeBuffer();
+ dl(URL.createObjectURL(new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})),'comissoes_'+a+'_a_'+b+'.xlsx');
+}
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+try{if(sessionStorage.getItem('vc_ok'))abrir()}catch(e){}
+</script>
+</body>
+</html>
