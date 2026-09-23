@@ -53,10 +53,14 @@ td.n,th.n{text-align:right}
   <div class="card">
     <h1>Minhas Vendas</h1>
     <p style="color:var(--mu);margin:4px 0 8px">Entre para ver suas comissões.</p>
-    <label for="u">Usuário</label><input id="u" autocomplete="username">
-    <label for="p">Senha</label><input id="p" type="password" autocomplete="current-password">
-    <div class="err" id="err"></div>
-    <button style="width:100%;margin-top:6px" onclick="entrar()">Entrar</button>
+    <form onsubmit="entrar();return false">
+      <label for="u">Usuário</label><input id="u" name="username" autocomplete="username">
+      <label for="p">Senha</label>
+      <div style="position:relative"><input id="p" name="password" type="password" autocomplete="current-password" style="padding-right:84px"><button type="button" class="g" id="eye" onclick="olho()" style="position:absolute;right:4px;top:4px;padding:7px 10px;font-size:13px">Mostrar</button></div>
+      <label style="display:flex;gap:8px;align-items:center;color:var(--tx)"><input type="checkbox" id="mc" style="width:auto"> Manter conectado neste navegador</label>
+      <div class="err" id="err"></div>
+      <button type="submit" style="width:100%;margin-top:6px">Entrar</button>
+    </form>
   </div>
 </div>
 
@@ -127,12 +131,12 @@ const rng=(a,b)=>S.sales.filter(s=>s.d>=a&&s.d<=b);
 
 function entrar(){
   if($('u').value.trim()==='Wagner'&&$('p').value==='Wagner1234'){
-    try{sessionStorage.setItem('vc_ok','1')}catch(e){}
+    try{($('mc').checked?localStorage:sessionStorage).setItem('vc_ok','1')}catch(e){}
     abrir();
   }else $('err').textContent='Usuário ou senha incorretos.';
 }
-function sair(){try{sessionStorage.removeItem('vc_ok')}catch(e){}$('app').classList.add('hide');$('login').classList.remove('hide');$('p').value=''}
-document.addEventListener('keydown',e=>{if(e.key==='Enter'&&!$('login').classList.contains('hide'))entrar()});
+function sair(){try{sessionStorage.removeItem('vc_ok');localStorage.removeItem('vc_ok')}catch(e){}$('app').classList.add('hide');$('login').classList.remove('hide');$('p').value=''}
+function olho(){const p=$('p'),v=p.type==='password';p.type=v?'text':'password';$('eye').textContent=v?'Ocultar':'Mostrar'}
 
 const tabs=[['dash','Resumo'],['venda','Lançar venda'],['cat','Categorias'],['rel','Relatório']];
 function ir(t){
@@ -253,7 +257,7 @@ async function xls(){
  dl(URL.createObjectURL(new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})),'comissoes_'+a+'_a_'+b+'.xlsx');
 }
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
-try{if(sessionStorage.getItem('vc_ok'))abrir()}catch(e){}
+try{if(sessionStorage.getItem('vc_ok')||localStorage.getItem('vc_ok'))abrir()}catch(e){}
 </script>
 </body>
 </html>
